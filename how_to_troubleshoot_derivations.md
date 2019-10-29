@@ -212,6 +212,53 @@ trace: { name = "First"; surname = "Last"; }
 The other functions in `debug.nix` are adopted to various cases and the source
 should be consulted for explanations.
 
+Sometimes dealing with trace functions can become a little bit cumbersome, as can require quite a few
+modifications to the source due to precedence rules and need to return the values. There exists a *nifty hack*
+to simplify adding debug outputs for trouble-shooting using assertions.
+
+Let's consider this simple example to illustrate:
+
+```
+nix-repl> builtins.trace "foo" (if true then true else false)
+trace: foo
+true
+
+nix-repl> assert builtins.trace "foo" true; if true then true else false
+trace: foo
+true
+```
+
+In the first case parenethesis are necessary to avoid a syntax error. In the
+following example of two functions with identical logic it becomes quite visible
+that the `assert`-approach can make it easier to add and remove traces with
+fewer code changes:
+
+```
+  fn1 = a: b:
+    builtins.trace "arg a: ${toString a}" (
+      if a >= 42 then
+        builtins.trace "arg b: ${toString b}" (
+          if b >= 23 then
+             "best numbers"
+          else
+            "good"
+        )
+      else
+        "meh"
+    );
+
+  fn2 = a: b:
+    assert builtins.trace "arg a: ${toString a}" true;
+    if a >= 42 then
+      assert builtins.trace "arg b: ${toString b}" true;
+      if b >= 23 then
+         "best numbers"
+      else
+         "good"
+    else
+      "meh";
+```
+
 ## nix-build: keeping code around
 
 [Source dir](./broken_code/)
