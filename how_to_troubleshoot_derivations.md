@@ -21,7 +21,7 @@ don't need additional build inputs for most examples.
 
 * broken_nix: Simple syntax error in the nix expression
 * broken_code: Build failure due to syntax error in the C source
-* breakpoint: Demo of the breakpoint to enter build sandbox
+* breakpoint: Demo of the breakpoint to enter the build sandbox
 
 ## Fundamentals
 
@@ -30,7 +30,7 @@ derivations to reduce the amount of frustration when trouble-shooting:
 
 * Nix is pure and functional; it's not possible to manipulate state and
   arbitrary side-effects are disallowed (or discouraged, since some unsafe
-  functions to exist)
+  functions do exist)
 * Nix is lazily evaluated; the order of statements does not matter and
   expressions are only evaluated when they are consumed
 * Nix expressions are used to produce derivations - the actual derivations are
@@ -126,7 +126,7 @@ cannot coerce a set to a string, at /nix/store/c8gsa6n8lb62xsjkidhivx01a1iyz1y4-
 
 which produces the same error as our full expression. At this point we likely
 already know that we made a mistake defining our version as an attribute set
-instead of a string and can confirm it with a fixed up expression in the repl;
+instead of a string and can confirm it with a fixed up expression in the repl:
 
 ```
 nix-repl> stdenv.mkDerivation { pname = "hello"; version = "0.0.1"; }
@@ -171,7 +171,7 @@ nix-repl> :p nested
 ```
 
 Nix repl also supports tab-completion, which is useful to explore attributes and
-functions like in case of `lib.trace*`;
+functions like in case of `lib.trace*`:
 
 ```
 nix-repl> lib.trace<TAB>
@@ -266,7 +266,7 @@ fewer code changes:
 
 [Source dir](./broken_code/)
 
-For this case, lets build the source using `nix-build`;
+For this case, lets build the source using `nix-build`:
 ```
 > nix-build -K -E '(import <nixpkgs> {}).callPackage ./broken_code/default.nix {}'
 ```
@@ -322,7 +322,7 @@ This way we can already gain a little bit of insight into the source of the erro
 the code as it was actually dowloaded and built.
 
 But if we wanted to actually build this source directly, we will notice that we lack
-the requisite environment;
+the requisite environment:
 
 ```
 > cd /tmp/nix-build-hello-0.0.1.drv-0
