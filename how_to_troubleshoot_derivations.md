@@ -13,7 +13,7 @@ familiar with C, a C compiler and make.
 
 Each of the folders represents a slightly different type of problem that is
 referred to in the different sections below. It should be possible for you to
-easily toy around and replicate the results on your own. 
+easily toy around and replicate the results on your own.
 
 One small remark about the code examples: Because we use `stdenv` we already
 have most basic tooling available (like cc, make, bintools, coreutils) so we
@@ -77,13 +77,17 @@ Let's try to execute our faulty expression first. The following is a way to load
 up the whole package expression in the way that's often used around nixpkgs:
 
 ```
-# We are loading up nixpkgs per default. We could also use ':l <nixpkgs>' instead, or for any additional file we want to evaluate.
 > nix repl '<nixpkgs>'
 [...]
-# Here we use callPackage for convenience, one could also use the more manual approach of `import ./03/default.nix { inherit pkgs; inherit stdenv; }` - they are not absolutely identical though. Why is a bit outside of the scope of this.
 nix-repl> pkgs.callPackage ./broken_nix/default.nix {}
 error: cannot coerce a set to a string, at /nix/store/c8gsa6n8lb62xsjkidhivx01a1iyz1y4-nixos-19.09.907.f6dac808387/nixos/pkgs/stdenv/generic/make-derivation.nix:191:19
 ```
+
+_Note: We are loading up nixpkgs per default. We could also_
+_use `:l <nixpkgs>` within the repl instead, or to load up any additional files_
+_we want to evaluate. `callPackage` is used for convenience, but it would be also_
+_possible to use the more manual approach of `import ./03/default.nix { inherit stdenv; }`_
+_- those expressions are not absolutely identical though. Why is a bit outside of the scope of this guide._
 
 Here we see that we are having some issue but the error message does not point
 us to any location in our code. We see that apparently a string was expected
@@ -100,8 +104,9 @@ error: while evaluating the derivation attribute 'name' at /nix/store/c8gsa6n8lb
 cannot coerce a set to a string, at /nix/store/c8gsa6n8lb62xsjkidhivx01a1iyz1y4-nixos-19.09.907.f6dac808387/nixos/pkgs/stdenv/generic/make-derivation.nix:191:19
 ```
 
-Here we now see that likely something is wrong with our name attribute. We don't
-set such an attribute, but we set something related:
+Here we now see that likely something is wrong with the `name` attribute. We don't
+set such an attribute directly, but we set something related (note; `pname` is not a typo,
+see [NixPkgs Manual - Using Stdenv](https://nixos.org/nixpkgs/manual/#sec-using-stdenv)):
 
 ```
 [...]
@@ -270,7 +275,7 @@ For this case, lets build the source using `nix-build`;
 
 To very briefly explain the invocation; Our `default.nix` is in the shape that
 most packages in nixpkgs have: a function that takes in some inputs and produces
-a derivation. Here the inputs are exlusively the dependencies our derivation has
+a derivation. Here the inputs are exclusively the dependencies our derivation has
 (`stdenv`) but often there can also be toggles for configuration. Since our
 expressions are not located within `nixpkgs` and are not wired up like other
 packages, we have to call the functions ourselves in an expression (`-E /
@@ -418,20 +423,22 @@ platforms, which is mostly linux. This approach only works on linux and requires
 and additional tool `cntr`.
 
 It's actually harder to replicate the build using this approach, but it's nevertheless good to know
-when you suspect issues due to the sandbox. For all other issues the other approaches outlined are 
+when you suspect issues due to the sandbox. For all other issues the other approaches outlined are
 probably simpler to troubleshoot most problems.
 
-To use this, we simply can add `pkgs.breakpointHook` to our [`nativeBuildInputs`](https://github.com/d-goldin/nix-drv-1p/blob/master/breakpoint/default.nix#L8).
+To use this, we can add `pkgs.breakpointHook` to our [`nativeBuildInputs`](https://github.com/d-goldin/nix-drv-1p/blob/master/breakpoint/default.nix#L8).
 
 ```
 > nix-build -K -E '(import <nixpkgs> {}).callPackage ./breakpoint/default.nix {}'
 [...]
+ping -c 1 127.0.0.1
+ping: socket: Operation not permitted
 make: *** [Makefile:3: hello] Error 1
 build failed in buildPhase with exit code 2
 To attach install cntr and run the following command as root:
 
    cntr attach -t command cntr-/nix/store/8l7dfzczkfl984lfn1vgx1wgfxi03g77-hello-0.0.1
- 
+
 ```
 
 ```
