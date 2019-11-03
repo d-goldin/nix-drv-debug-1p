@@ -145,21 +145,19 @@ obvious once we inspect line 191 in
 Now we could just toy around with this on the repl like so:
 
 ```
-# We can simply set variables like so.
-nix-repl> attrs = { pname = "hello"; version = { a = "0.0.1"; }; }
+[1] nix-repl> attrs = { pname = "hello"; version = { a = "0.0.1"; }; }
 
-# Now we can just try out the line to confirm our suspicion
-nix-repl> name = "${attrs.pname}-${attrs.version}"
+[2] nix-repl> name = "${attrs.pname}-${attrs.version}"
 
-# Hmm, so this did not cause the error we expected.
-# This is because the expression is evaluated lazily, so we should force the evaluation somehow.
-# One way to do so this in the repl is to try and print it:
-
-nix-repl> name
+[3] nix-repl> name
 error: cannot coerce a set to a string, at (string):1:11
 ```
 
-In some cases, like nested structures, just evaluating values in the above way
+In line 1 we simply set a variable, define another variable based on a string expression in line 2 and force
+evaluation of the expression in line 3. Latter is necessary because the expression is evaluated lazily, so evaluation
+has to be forced somehow. One way to do so this in the repl is to let the repl print it.
+
+In some cases, like nested structures, just evaluating in the above way
 might be insufficient. In that case `:p` can be sued, as shown below:
 
 ```
